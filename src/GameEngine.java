@@ -181,14 +181,5 @@ public class GameEngine {
         GameEngine ge = new GameEngine(user);
         ge.interaction(user, ge);
         sc.close();
-        // ge.checkPocket(user);
-
-        // HashMap <Integer, Character> options;
-        // options = ge.printPocketOptions(user);
-        // options = ge.printAvailability();
-
-        // 2. list options for user to play with
-//        {1. check pocket; 2. catch a new character}
-
     }
 }
