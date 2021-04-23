@@ -1,6 +1,7 @@
-import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.HashMap;
+import java.util.Random;
+
 
 public class GameEngine {
     public User user;
@@ -70,7 +71,6 @@ public class GameEngine {
     }
     // add default characters to user's pocket(mario, peach, yoshi)
     public void addDefaultChars(User user, Character[] chars) {
-
         for (Character i : chars) {
             user.pocket.add(i);
             allCharacters.put(i, true);
@@ -86,22 +86,90 @@ public class GameEngine {
     }
 
     // print options from pocket
-    public void printPocketOptions(User user) {
+    public HashMap<Integer, Character> printPocketOptions(User user) {
+        HashMap<Integer, Character> options = new HashMap<Integer, Character>();
         System.out.println("Please choose character from your pocket:");
         for (int i = 0; i < user.pocket.size(); i++) {
             System.out.println(i + 1 + ": " + user.pocket.get(i).name);
+            options.put(i+1, user.pocket.get(i));
         }
+        return options;
     }
 
-    public void printAvailability() {
+    // print out characters for user to catch
+    public HashMap<Integer, Character> printAvailability() {
+
+        HashMap<Integer, Character> options = new HashMap<Integer, Character>();
+        System.out.println("Please choose a character you want to catch:");
+        int index = 1;
+        for (Character c : allCharacters.keySet()) {
+            if (!allCharacters.get(c)) {
+                System.out.println(index + ": " + c.name);
+                options.put(index, c);
+                index++;
+            }
+        }
+        return options;
 
     }
 
-    // catch: 1. let user choose 1 character from the pocket;
-    //        2. display the available characters to catch;
+    // catch: 1. let user choose 1 character from the pocket; -int
+    //        2. display the available characters to catch; -int
     //        3. let these two fight: -win: put into pocket -lose: nothing happens
-    public static void main(String[] args) {
 
+    public boolean doesUserWin(Character challanger, Character opponent) {
+        int totalPower = challanger.power + opponent.power;
+        Random rand = new Random();
+        int randonNum = rand.nextInt((totalPower - 1) + 1) + 1;
+        if (randonNum >= 1 && randonNum <= challanger.power) {
+            return true;
+        }
+        return false;
+    }
+
+    public void putIntoPocket(Character character, User user) {
+        user.pocket.add(character);
+        allCharacters.put(character, true);
+    }
+
+    public void interaction(User user, GameEngine ge) {
+        boolean isGameEnd = false;
+        while (!isGameEnd) {
+            Scanner sc = new Scanner(System.in);
+            System.out.println("Please select an operation: [1]. Check Pocket; [2]. Catch a character; [3]. Quit");
+            int userChoice = sc.nextInt();
+            switch (userChoice) {
+                case 1:
+                    ge.checkPocket(user);
+                break;
+                case 2:
+                    HashMap<Integer, Character> option = ge.printAvailability();
+                    userChoice = sc.nextInt();
+                    Character opponent = option.get(userChoice);
+                    option = ge.printPocketOptions(user);
+                    userChoice = sc.nextInt();
+                    Character challanger = option.get(userChoice);
+                    if (ge.doesUserWin(challanger, opponent)) {
+                        System.out.println("Congrates! You Caught " + opponent.name);
+                        ge.putIntoPocket(opponent, user);
+                    } else {
+                        System.out.println("Ops! " + opponent.name + " defeat " + challanger.name);
+                    }
+                break;
+                case 3:
+                    isGameEnd = true;
+                    System.out.println("Bye!");
+                    sc.close();
+                break;
+                default:
+                    // ge.interaction(user, ge);
+                break;
+            }
+        }
+
+    }
+
+    public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         System.out.println("Welcome to nintendogo!");
         // 1. make an user instance with input name<string>
@@ -111,9 +179,14 @@ public class GameEngine {
         System.out.println("Your name is: " + name);
         User user = new User(name);
         GameEngine ge = new GameEngine(user);
-        ge.checkPocket(user);
+        ge.interaction(user, ge);
+        sc.close();
+        // ge.checkPocket(user);
 
-        ge.printPocketOptions(user);
+        // HashMap <Integer, Character> options;
+        // options = ge.printPocketOptions(user);
+        // options = ge.printAvailability();
+
         // 2. list options for user to play with
 //        {1. check pocket; 2. catch a new character}
 
